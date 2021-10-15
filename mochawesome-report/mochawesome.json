@@ -1,0 +1,310 @@
+{
+  "stats": {
+    "suites": 4,
+    "tests": 7,
+    "passes": 7,
+    "pending": 0,
+    "failures": 0,
+    "start": "2021-10-14T14:48:13.783Z",
+    "end": "2021-10-14T14:48:14.091Z",
+    "duration": 308,
+    "testsRegistered": 7,
+    "passPercent": 100,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "fdc39d38-571b-4548-a118-a48cb33d7f23",
+      "title": "",
+      "fullFile": "",
+      "file": "",
+      "beforeHooks": [
+        {
+          "title": "\"before all\" hook in \"{root}\"",
+          "fullTitle": "\"before all\" hook in \"{root}\"",
+          "timedOut": false,
+          "duration": 21,
+          "state": null,
+          "speed": null,
+          "pass": false,
+          "fail": false,
+          "pending": false,
+          "context": null,
+          "code": "// start the server\napp.listen(port, () => {\n    mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: true });\n    mongoose.connection.once('open', () => {\n        console.log('connected to database');\n        done();\n    }).on('connectionError', (err) =>{\n        console.log(err);\n    })\n})",
+          "err": {},
+          "uuid": "ee7e31c2-7bc6-4da5-bb77-797f44fa8ef5",
+          "parentUUID": "fdc39d38-571b-4548-a118-a48cb33d7f23",
+          "isHook": true,
+          "skipped": false
+        }
+      ],
+      "afterHooks": [
+        {
+          "title": "\"after all\" hook in \"{root}\"",
+          "fullTitle": "\"after all\" hook in \"{root}\"",
+          "timedOut": false,
+          "duration": 4,
+          "state": null,
+          "speed": null,
+          "pass": false,
+          "fail": false,
+          "pending": false,
+          "context": null,
+          "code": "mongoose.connection.db.dropDatabase(() => {\n    mongoose.disconnect().then(() => done()).catch(err => console.log(err));\n})",
+          "err": {},
+          "uuid": "88c1b47f-5118-4c6f-8e23-967bc3aa599d",
+          "parentUUID": "fdc39d38-571b-4548-a118-a48cb33d7f23",
+          "isHook": true,
+          "skipped": false
+        }
+      ],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "bc505b0f-b223-4f39-9271-0a8709f2ceb2",
+          "title": "Signup",
+          "fullFile": "C:\\Users\\maste\\work\\ecommerce-node\\ecommerce\\__tests__\\auth.test.js",
+          "file": "\\__tests__\\auth.test.js",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [],
+          "suites": [
+            {
+              "uuid": "0ce5f0b0-b959-4efc-8425-b985af5c3d67",
+              "title": "POST /auth/signup",
+              "fullFile": "C:\\Users\\maste\\work\\ecommerce-node\\ecommerce\\__tests__\\auth.test.js",
+              "file": "\\__tests__\\auth.test.js",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "returns validation error when invalid email is sent",
+                  "fullTitle": "Signup POST /auth/signup returns validation error when invalid email is sent",
+                  "timedOut": false,
+                  "duration": 24,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "const signUpBody = {\n    \"email\": \"akak.com\",\n    \"password\": \"311114\",\n    \"fullName\": \"dkj asdaskjdnaskjn\"\n}\nchai\n    .request(app)\n    .post('/auth/signup')\n    .set('Content-Type', 'application/json')\n    .send(signUpBody)\n    .end((err, res) => {\n        if (err) throw err;\n        expect(res.body).not.to.eql(null)\n        expect(res.body.error).not.to.eql(null)\n        expect(res.body.error[0].message.includes('email')).to.eql(true)\n        expect(res.status).to.eql(400)\n        done()\n    })",
+                  "err": {},
+                  "uuid": "847643b3-f0dc-4cda-8dae-4234cc86d9fe",
+                  "parentUUID": "0ce5f0b0-b959-4efc-8425-b985af5c3d67",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "returns validation error when passowrd is less than 6 characters",
+                  "fullTitle": "Signup POST /auth/signup returns validation error when passowrd is less than 6 characters",
+                  "timedOut": false,
+                  "duration": 5,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "const signUpBody = {\n    \"email\": \"ak@aak.com\",\n    \"password\": \"31\",\n    \"fullName\": \"dkj asdaskjdnaskjn\"\n}\nchai\n    .request(app)\n    .post('/auth/signup')\n    .set('Content-Type', 'application/json')\n    .send(signUpBody)\n    .end((err, res) => {\n        if (err) throw err;\n        expect(res.body).not.to.eql(null)\n        expect(res.body.error).not.to.eql(undefined)\n        expect(res.body.error[0].message.includes('password')).to.eql(true)\n        expect(res.status).to.eql(400)\n        done()\n    })",
+                  "err": {},
+                  "uuid": "04389758-ad22-43c8-8ba5-42dc6f67edbd",
+                  "parentUUID": "0ce5f0b0-b959-4efc-8425-b985af5c3d67",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "returns validation error when fullName is not present or is less than 6 chars",
+                  "fullTitle": "Signup POST /auth/signup returns validation error when fullName is not present or is less than 6 chars",
+                  "timedOut": false,
+                  "duration": 3,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "const signUpBody = {\n    \"email\": \"ak@aak.com\",\n    \"password\": \"123456\",\n    \"fullName\": \"dkj\"\n}\nchai\n    .request(app)\n    .post('/auth/signup')\n    .set('Content-Type', 'application/json')\n    .send(signUpBody)\n    .end((err, res) => {\n        if (err) throw err;\n        expect(res.body).not.to.eql(null)\n        expect(res.body.error).not.to.eql(undefined)\n        expect(res.body.error[0].message.includes('fullName')).to.eql(true)\n        expect(res.status).to.eql(400)\n        done()\n    })",
+                  "err": {},
+                  "uuid": "09201300-c8d3-458c-8b59-3de78b66f027",
+                  "parentUUID": "0ce5f0b0-b959-4efc-8425-b985af5c3d67",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "returns user key with value as userId on succesful signup",
+                  "fullTitle": "Signup POST /auth/signup returns user key with value as userId on succesful signup",
+                  "timedOut": false,
+                  "duration": 97,
+                  "state": "passed",
+                  "speed": "slow",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "const signUpBody = {\n    \"email\": \"ak@aakq.com\",\n    \"password\": \"123456\",\n    \"fullName\": \"dkjklq\"\n}\nchai\n    .request(app)\n    .post('/auth/signup')\n    .set('Content-Type', 'application/json')\n    .send(signUpBody)\n    .end((err, res) => {\n        if (err) throw err;\n        expect(res.body).not.to.eql(null)\n        expect(res.body.error).to.eql(undefined)\n        expect(res.body.user).to.not.\n            eql(null)\n        expect(res.status).to.eql(200)\n        done()\n    })",
+                  "err": {},
+                  "uuid": "f7f137d0-79b8-416f-9952-4be98f14b9ad",
+                  "parentUUID": "0ce5f0b0-b959-4efc-8425-b985af5c3d67",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "returns error if email already exists",
+                  "fullTitle": "Signup POST /auth/signup returns error if email already exists",
+                  "timedOut": false,
+                  "duration": 5,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "const signUpBody = {\n                \"email\": \"ak@aakq.com\",\n                \"password\": \"123456\",\n                \"fullName\": \"dkjdddd\"\n            }\n            const res = await chai\n                .request(app)\n                .post('/auth/signup')\n                .set('Content-Type', 'application/json')\n                .send(signUpBody);\n            expect(res.body).not.to.eql(null)\n            expect(res.body.error).not.to.eql(undefined)\n            expect((/Email already in use by someone/i).test(res.body['error'])).to.eql(true)\n            expect(res.status).to.eql(400)",
+                  "err": {},
+                  "uuid": "8c1bf03c-4d0f-4484-8e01-85ea5272c0fa",
+                  "parentUUID": "0ce5f0b0-b959-4efc-8425-b985af5c3d67",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [
+                "847643b3-f0dc-4cda-8dae-4234cc86d9fe",
+                "04389758-ad22-43c8-8ba5-42dc6f67edbd",
+                "09201300-c8d3-458c-8b59-3de78b66f027",
+                "f7f137d0-79b8-416f-9952-4be98f14b9ad",
+                "8c1bf03c-4d0f-4484-8e01-85ea5272c0fa"
+              ],
+              "failures": [],
+              "pending": [],
+              "skipped": [],
+              "duration": 134,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 60000
+            }
+          ],
+          "passes": [],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 0,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 60000
+        },
+        {
+          "uuid": "5cd2828c-f2ae-4ba0-bd91-575614b4d785",
+          "title": "Signin",
+          "fullFile": "C:\\Users\\maste\\work\\ecommerce-node\\ecommerce\\__tests__\\auth.test.js",
+          "file": "\\__tests__\\auth.test.js",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [],
+          "suites": [
+            {
+              "uuid": "9c59b4cd-621a-4a4c-bed1-b03c8765584f",
+              "title": "POST /auth/signin",
+              "fullFile": "C:\\Users\\maste\\work\\ecommerce-node\\ecommerce\\__tests__\\auth.test.js",
+              "file": "\\__tests__\\auth.test.js",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "returns auth-token and message in response and auth-token in header on successful login",
+                  "fullTitle": "Signin POST /auth/signin returns auth-token and message in response and auth-token in header on successful login",
+                  "timedOut": false,
+                  "duration": 68,
+                  "state": "passed",
+                  "speed": "medium",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "const signInBody = {\n    \"email\": \"ak@aakq.com\",\n    \"password\": \"123456\"\n}\nconst res = await chai\n    .request(app)\n    .post('/auth/signin')\n    .set('Content-Type', 'application/json')\n    .send(signInBody);\nexpect(res.body).not.to.eql(null)\nexpect(res.body.error).to.eql(undefined)\nexpect(res.body['auth-token']).to.not.eql(undefined)\nexpect(res.header['auth-token']).to.not.eql(undefined)\nexpect((/User logged in successfully/i).test(res.body.message)).to.eql(true)\nexpect(res.status).to.eql(201)",
+                  "err": {},
+                  "uuid": "20115ea7-818d-4e45-b059-911fe05f6838",
+                  "parentUUID": "9c59b4cd-621a-4a4c-bed1-b03c8765584f",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "returns message password is wrong on wrong password",
+                  "fullTitle": "Signin POST /auth/signin returns message password is wrong on wrong password",
+                  "timedOut": false,
+                  "duration": 66,
+                  "state": "passed",
+                  "speed": "medium",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "const signInBody = {\n    \"email\": \"ak@aakq.com\",\n    \"password\": \"123456a\"\n}\nconst res = await chai\n    .request(app)\n    .post('/auth/signin')\n    .set('Content-Type', 'application/json')\n    .send(signInBody);\nexpect(res.body).not.to.eql(null)\nexpect(res.body.message).to.not.eql(undefined)\nexpect(res.body['auth-token']).to.eql(undefined)\nexpect(res.header['auth-token']).to.eql(undefined)\nexpect((/password is wrong/i).test(res.body.message)).to.eql(true)\nexpect(res.status).to.eql(400)",
+                  "err": {},
+                  "uuid": "ef1e301e-a068-4fdb-8472-934a8a4f6c30",
+                  "parentUUID": "9c59b4cd-621a-4a4c-bed1-b03c8765584f",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [
+                "20115ea7-818d-4e45-b059-911fe05f6838",
+                "ef1e301e-a068-4fdb-8472-934a8a4f6c30"
+              ],
+              "failures": [],
+              "pending": [],
+              "skipped": [],
+              "duration": 134,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 60000
+            }
+          ],
+          "passes": [],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 0,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 60000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 60000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "8.2.1"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": true,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "6.2.1"
+    },
+    "marge": {
+      "options": null,
+      "version": "5.1.0"
+    }
+  }
+}
