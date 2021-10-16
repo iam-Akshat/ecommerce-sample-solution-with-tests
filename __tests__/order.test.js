@@ -19,6 +19,21 @@ describe("/order",()=>{
                 .send({ email, password })
             
             const auth_token = signInRes.body['auth-token']
+            const products = await Product.find({}) 
+            const resBody = {
+                productIds:[
+                    {
+                        product:products[0].id,
+                        quantity:20
+                    }
+                ]
+            }
+            await chai
+                .request(app)
+                .post('/cart')
+                .set('Content-Type','application/json')
+                .set('auth-token',auth_token)
+                .send(resBody)
 
             const res = await chai
                             .request(app)
@@ -75,8 +90,7 @@ describe("/order",()=>{
                             .request(app)
                             .post('/order')
                             .set('Content-Type','application/json')
-                            .set('auth-token',auth_token)
-            console.log(res.body);  
+                            .set('auth-token',auth_token) 
             expect((/Some products are out of stock/i).test(res.body.message)).to.eql(true)
             expect(res.body.outOfStockItems).to.eql(product.name)
         })
