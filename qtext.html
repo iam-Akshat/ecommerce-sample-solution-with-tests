@@ -1,0 +1,521 @@
+<p>We will create an ecommerce API in this project.</p>
+<p>The following functionalities will be implemented by you: The API will be described in detail further on.</p>
+<ol>
+    <li>
+        <p>Signing up and logging in as a user. Authentication should be done through JWT.<br />The role field in the
+            user schema can have one of two values: "user" or "admin." By default, the role of each new user generated
+            will be "user." So the user schema should have four fields: "fullName," "email," "password" (don't save it
+            as plain text, hash it), and "role," with only the first three being utilised in signup. Verify that the
+            email address is valid, and that the password and fullName are both at least six characters long.</p>
+    </li>
+    <li>Apart from that we need models for Category, Product, Cart and Order.</li>
+    <li>Category will inlcude one field "name" which is the name of the category.</li>
+    <li>Product will have fields for "name," "price," and "quantity," as well as a field for "category," which will
+        store the id of any Category model object.</li>
+    <li>Cart will include field "user" which stores the id of user who created it.</li>
+    <li>Cart will also contain a field "products" which is an array of all the products user want to add, which will be
+        of this structure <code>{product:productId,quantity:number}.</code></li>
+    <li>Order model&nbsp; will contain "ordered_by" field which as you can guess contains the id
+        of the user who created it,"items" field which will be an array containing objects of this structure.
+        <code>{product:productId,quantity:number}.</code> "totalPrice" field will contain the order total i.e
+        product.quantity*product.price.</li>
+    <li>Since every order has a stutus ours will too, field "status" by default its value will be "placed", this will be
+        automatically set when user places the order. If user has no cart associated with them
+        return<code>{message:'No cart found'} </code>with status code 400.</li>
+    <li>Also while creating Order check if user cart has items which have quantity more than available for that product,
+        if that happens return this&amp;nbsp
+        <code>{message:'Some products are out of stock',outOfStockItems:'Item-names&nbsp; seperated by space'}</code>;
+    </li>
+</ol>
+<p>API Spec</p>
+<ul>
+    <li>Only users who are admin can create categories and products.</li>
+    <li>Unauthenticated users can view products and categories,but can not create cart and place order</li>
+    <li>Requests which require authentication must include "auth-token" in header, make your app check in that header
+        for JWT token while doing auth(Create a middleware which you use on each route requiring auth, which checks for
+        "auth-token" in header,checks if its valid or not).</li>
+</ul>
+<p>&nbsp;Auth</p>
+<p>POST /auth/signup</p>
+<div><code><code></code></code>
+    <div>&nbsp;CASE - 1 All info correct,</div>
+    <div>&nbsp; &nbsp; &nbsp;const body = {</div>
+    <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+        &nbsp;email:"me@me.com",</div>
+    <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+        &nbsp;password:"123456",</div>
+    <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+        &nbsp;fullName:"Newton School"</div>
+    <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}</div>
+    <div>&nbsp; &nbsp;Response:- user key with value as userId created</div>
+    <div>
+        <div>&nbsp; &nbsp;{</div>
+        <div>&nbsp; &nbsp; &nbsp; user: "616c06ef97ad296db03e35b7"</div>
+        <div>&nbsp; &nbsp;}</div>
+        <div>&nbsp;</div>
+        <div>
+            <div>CASE - 2 Email already exists,</div>
+            <div>&nbsp; &nbsp; &nbsp;const body = {</div>
+            <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                &nbsp;email:"me@me.com",</div>
+            <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                &nbsp;password:"123456",</div>
+            <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                &nbsp;fullName:"Newton School"</div>
+            <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}</div>
+            <div>&nbsp; &nbsp;Response:-&nbsp;</div>
+            <div>
+                <div>&nbsp; {</div>
+                <div>&nbsp; &nbsp; error: "Email already in use by someone"</div>
+                <div>&nbsp; }</div>
+                <div>&nbsp;</div>
+                <div>
+                    <div>CASE - 3 Any field validation error, like wrong email</div>
+                    <div>&nbsp; &nbsp; &nbsp;const body = {</div>
+                    <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                        &nbsp;email:"meme.com",</div>
+                    <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                        &nbsp;password:"123456",</div>
+                    <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                        &nbsp;fullName:"Newton School"</div>
+                    <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}
+                    </div>
+                    <div>&nbsp; &nbsp;Response:- error which is an array,the message should contain name of the&nbsp;
+                        field which failed the validation., like in this response "email" is invalid. Please make sure
+                        your API returns response in this format only.</div>
+                    <div>
+                        <div>
+                            <div>
+                                <div>{</div>
+                                <div>&nbsp; &nbsp; error: [</div>
+                                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</div>
+                                <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; message: "email" must be a valid email",
+                                </div>
+                                <div>&nbsp; &nbsp; &nbsp; &nbsp; }</div>
+                                <div>&nbsp;&nbsp;&nbsp;&nbsp;]</div>
+                                <div>}</div>
+                            </div>
+                        </div>
+                        <div>POST /auth/signin</div>
+                        <div>
+                            <div>CASE - 1 All info correct,</div>
+                            <div>&nbsp; &nbsp; &nbsp;const body = {</div>
+                            <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                                &nbsp; &nbsp;email:"me@me.com",</div>
+                            <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                                &nbsp; &nbsp;password:"123456",</div>
+                            <div>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                                &nbsp; &nbsp;}</div>
+                            <div>&nbsp; &nbsp;Response:- "auth-token" contains jwt.</div>
+                            <div>
+                                <div>
+                                    <div>
+                                        <div>{</div>
+                                        <div>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;"auth-token":&nbsp;"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTVlY2UzYzQ5MTQxMzFmNWMwMjUyOTAiLCJpYXQiOjE2MzQ0NzE3MzMsImV4cCI6MTYzNDU1ODEzM30.wE-Kiv13-x2NLkX-vmGd1kOXw6A5YMvAZR8KRlzpauY",
+                                        </div>
+                                        <div>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"User&nbsp;logged&nbsp;in&nbsp;successfully"
+                                        </div>
+                                        <div>}</div>
+                                    </div>
+                                </div>
+                                <div>CASE - 2 Wrong Password</div>
+                                <div>
+                                    <div>&nbsp; &nbsp; &nbsp;const body = {</div>
+                                    <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                                        &nbsp; &nbsp; &nbsp;email:"me@me.com",</div>
+                                    <div>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                                        &nbsp; &nbsp; &nbsp;password:"12a3456",</div>
+                                    <div>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                                        &nbsp; &nbsp; &nbsp;}</div>
+                                    <div>
+                                        <div>&nbsp; &nbsp;Response:- With status code 400</div>
+                                        <div>
+                                            <div>{</div>
+                                            <div>&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"password&nbsp;is&nbsp;wrong"
+                                            </div>
+                                            <div>}</div>
+                                            <div>&nbsp;</div>
+                                            <div>GET /category</div>
+                                            <div>Returns all categories, in this format</div>
+                                            <div>
+                                                <div>{</div>
+                                                <div>&nbsp;&nbsp;&nbsp;&nbsp;"categories":&nbsp;[</div>
+                                                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</div>
+                                                <div>
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"_id":&nbsp;"615ee4348da65539a879db85",
+                                                </div>
+                                                <div>
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"name":&nbsp;"Bags",
+                                                </div>
+                                                <div>
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"__v":&nbsp;0
+                                                </div>
+                                                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},</div>
+                                                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</div>
+                                                <div>
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"_id":&nbsp;"615ee454a0e057306cbd2590",
+                                                </div>
+                                                <div>
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"name":&nbsp;"Bags",
+                                                </div>
+                                                <div>
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"__v":&nbsp;0
+                                                </div>
+                                                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},</div>
+                                                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</div>
+                                                <div>
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"_id":&nbsp;"615ef1a793bbe028c896a017",
+                                                </div>
+                                                <div>
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"name":&nbsp;"Bags",
+                                                </div>
+                                                <div>
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"__v":&nbsp;0
+                                                </div>
+                                                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},</div>
+                                                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</div>
+                                                <div>
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"_id":&nbsp;"6167cfd38821a511b0973c10",
+                                                </div>
+                                                <div>
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"name":&nbsp;"Cars",
+                                                </div>
+                                                <div>
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"__v":&nbsp;0
+                                                </div>
+                                                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                                                <div>&nbsp;&nbsp;&nbsp;&nbsp;]</div>
+                                                <div>}</div>
+                                                <div>POST /category - only user with role admin</div>
+                                                <div>const body = {
+                                                    <div>
+                                                        <div>&nbsp;&nbsp;&nbsp;&nbsp;"name":"Cars"</div>
+                                                        <div>}</div>
+                                                        <div>&nbsp;</div>
+                                                        <div>Response:-</div>
+                                                        <div>
+                                                            <div>{</div>
+                                                            <div>&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Success",
+                                                            </div>
+                                                            <div>&nbsp;&nbsp;&nbsp;&nbsp;"result":&nbsp;{</div>
+                                                            <div>
+                                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"_id":&nbsp;"616c1fe697ad296db03e35b8",
+                                                            </div>
+                                                            <div>
+                                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"name":&nbsp;"Cars",
+                                                            </div>
+                                                            <div>
+                                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"__v":&nbsp;0
+                                                            </div>
+                                                            <div>&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                                                            <div>}</div>
+                                                            <div>&nbsp;</div>
+                                                            <div>GET /product</div>
+                                                            <div>
+                                                                <div>{</div>
+                                                                <div>&nbsp;&nbsp;&nbsp;&nbsp;"products":&nbsp;[</div>
+                                                                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+                                                                </div>
+                                                                <div>
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"_id":&nbsp;"615ef86a02cb0d4ce08bb552",
+                                                                </div>
+                                                                <div>
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"name":&nbsp;"Tote&nbsp;bag",
+                                                                </div>
+                                                                <div>
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"price":&nbsp;130.45,
+                                                                </div>
+                                                                <div>
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"quantity":&nbsp;44,
+                                                                </div>
+                                                                <div>
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"category":&nbsp;"615ef1a793bbe028c896a017",
+                                                                </div>
+                                                                <div>
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"__v":&nbsp;0
+                                                                </div>
+                                                                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},
+                                                                </div>
+                                                                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+                                                                </div>
+                                                                <div>
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"_id":&nbsp;"615efac10f15d13b10bb63da",
+                                                                </div>
+                                                                <div>
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"name":&nbsp;"Tote&nbsp;bagss",
+                                                                </div>
+                                                                <div>
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"price":&nbsp;130.45,
+                                                                </div>
+                                                                <div>
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"quantity":&nbsp;90,
+                                                                </div>
+                                                                <div>
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"category":&nbsp;"615ef1a793bbe028c896a017",
+                                                                </div>
+                                                                <div>
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"__v":&nbsp;0
+                                                                </div>
+                                                                <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+                                                                </div>
+                                                                <div>&nbsp;&nbsp;&nbsp;&nbsp;]</div>
+                                                                <div>}</div>
+                                                                <div>&nbsp;</div>
+                                                                <div>POST /product, only admin role user can do this
+                                                                </div>
+                                                                <div>const body = {
+                                                                    <div>
+                                                                        <div>
+                                                                            &nbsp;&nbsp;&nbsp;&nbsp;"name":"Tote&nbsp;bagss",
+                                                                        </div>
+                                                                        <div>&nbsp;&nbsp;&nbsp;&nbsp;"price":"130.45",
+                                                                        </div>
+                                                                        <div>&nbsp;&nbsp;&nbsp;&nbsp;"quantity":"100",
+                                                                        </div>
+                                                                        <div>
+                                                                            &nbsp;&nbsp;&nbsp;&nbsp;"category":"615ef1a793bbe028c896a017"
+                                                                        </div>
+                                                                        <div>}</div>
+                                                                        <div>&nbsp;</div>
+                                                                        <div>Response:-</div>
+                                                                        <div>
+                                                                            <div>{</div>
+                                                                            <div>
+                                                                                &nbsp;&nbsp;&nbsp;&nbsp;"result":&nbsp;{
+                                                                            </div>
+                                                                            <div>
+                                                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"_id":&nbsp;"616c76c897ad296db03e35b9",
+                                                                            </div>
+                                                                            <div>
+                                                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"name":&nbsp;"Tote&nbsp;bagss",
+                                                                            </div>
+                                                                            <div>
+                                                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"price":&nbsp;130.45,
+                                                                            </div>
+                                                                            <div>
+                                                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"quantity":&nbsp;100,
+                                                                            </div>
+                                                                            <div>
+                                                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"category":&nbsp;"615ef1a793bbe028c896a017",
+                                                                            </div>
+                                                                            <div>
+                                                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"__v":&nbsp;0
+                                                                            </div>
+                                                                            <div>&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                                                                            <div>}</div>
+                                                                            <div>&nbsp;</div>
+                                                                            <div>POST /cart</div>
+                                                                            <div>const body = {</div>
+                                                                            <div>
+                                                                                <div>
+                                                                                    &nbsp;&nbsp;&nbsp;&nbsp;"productIds":[{
+                                                                                </div>
+                                                                                <div>
+                                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"product":"615ef86a02cb0d4ce08bb552",
+                                                                                </div>
+                                                                                <div>
+                                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"quantity":1
+                                                                                </div>
+                                                                                <div>&nbsp;&nbsp;&nbsp;&nbsp;}]</div>
+                                                                                <div>}</div>
+                                                                                <div>&nbsp;</div>
+                                                                                <div>Response:-</div>
+                                                                                <div>
+                                                                                    <div>
+                                                                                        <div>{</div>
+                                                                                        <div>
+                                                                                            &nbsp;&nbsp;&nbsp;&nbsp;"newCart":&nbsp;{
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"_id":&nbsp;"616c773797ad296db03e35bb",
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"products":&nbsp;[
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"quantity":&nbsp;1,
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"_id":&nbsp;"616c773797ad296db03e35bc",
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"product":&nbsp;"615ef86a02cb0d4ce08bb552"
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;],
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"user":&nbsp;"615ece3c4914131f5c025290",
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"__v":&nbsp;0
+                                                                                        </div>
+                                                                                        <div>&nbsp;&nbsp;&nbsp;&nbsp;}
+                                                                                        </div>
+                                                                                        <div>}</div>
+                                                                                        <div>Notice productIds in
+                                                                                            request body and products in
+                                                                                            response body have similare
+                                                                                            structure except the
+                                                                                            autogenerated _id. "user"
+                                                                                            field contains the id of
+                                                                                            logged in user.</div>
+                                                                                        <div>&nbsp;</div>
+                                                                                        <div>GET /cart</div>
+                                                                                        <div>returns almost similar
+                                                                                            object as above except key
+                                                                                            is cart instead of newCart.
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <div>
+                                                                                                <div>{</div>
+                                                                                                <div>
+                                                                                                    &nbsp;&nbsp;&nbsp;&nbsp;"cart":&nbsp;{
+                                                                                                </div>
+                                                                                                <div>
+                                                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"_id":&nbsp;"616c773797ad296db03e35bb",
+                                                                                                </div>
+                                                                                                <div>
+                                                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"products":&nbsp;[
+                                                                                                </div>
+                                                                                                <div>
+                                                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+                                                                                                </div>
+                                                                                                <div>
+                                                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"quantity":&nbsp;1,
+                                                                                                </div>
+                                                                                                <div>
+                                                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"_id":&nbsp;"616c773797ad296db03e35bc",
+                                                                                                </div>
+                                                                                                <div>
+                                                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"product":&nbsp;"615ef86a02cb0d4ce08bb552"
+                                                                                                </div>
+                                                                                                <div>
+                                                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+                                                                                                </div>
+                                                                                                <div>
+                                                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;],
+                                                                                                </div>
+                                                                                                <div>
+                                                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"user":&nbsp;"615ece3c4914131f5c025290",
+                                                                                                </div>
+                                                                                                <div>
+                                                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"__v":&nbsp;0
+                                                                                                </div>
+                                                                                                <div>
+                                                                                                    &nbsp;&nbsp;&nbsp;&nbsp;}
+                                                                                                </div>
+                                                                                                <div>}</div>
+                                                                                                <div>&nbsp;</div>
+                                                                                                <div>POST /order
+                                                                                                    (requires no body,
+                                                                                                    just a post request)
+                                                                                                </div>
+                                                                                                <div>CASE-1 When cart is
+                                                                                                    there of the user
+                                                                                                    sending the request
+                                                                                                </div>
+                                                                                                <div>&nbsp;</div>
+                                                                                                <div>Response:-</div>
+                                                                                                <div>
+                                                                                                    <div>
+                                                                                                        <div>{</div>
+                                                                                                        <div>
+                                                                                                            &nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Order&nbsp;successful",
+                                                                                                        </div>
+                                                                                                        <div>
+                                                                                                            &nbsp;&nbsp;&nbsp;&nbsp;"orderId":&nbsp;"616c784797ad296db03e35bd",
+                                                                                                        </div>
+                                                                                                        <div>
+                                                                                                            &nbsp;&nbsp;&nbsp;&nbsp;"totalPrice":&nbsp;130.45
+                                                                                                        </div>
+                                                                                                        <div>}</div>
+                                                                                                        <div>&nbsp;
+                                                                                                        </div>
+                                                                                                        <div>CASE -2
+                                                                                                            When no cart
+                                                                                                            is there
+                                                                                                        </div>
+                                                                                                        <div>&nbsp;
+                                                                                                        </div>
+                                                                                                        <div>
+                                                                                                            <div>
+                                                                                                                <div>{
+                                                                                                                </div>
+                                                                                                                <div>
+                                                                                                                    &nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"No&nbsp;cart&nbsp;found"
+                                                                                                                </div>
+                                                                                                                <div>}
+                                                                                                                </div>
+                                                                                                                <div>
+                                                                                                                    Status
+                                                                                                                    code
+                                                                                                                    400
+                                                                                                                </div>
+                                                                                                                <div>
+                                                                                                                    &nbsp;
+                                                                                                                </div>
+                                                                                                                <div>
+                                                                                                                    CASE
+                                                                                                                    -3
+                                                                                                                    Cart
+                                                                                                                    contains
+                                                                                                                    items
+                                                                                                                    with
+                                                                                                                    quantities
+                                                                                                                    greater
+                                                                                                                    than
+                                                                                                                    available
+                                                                                                                </div>
+                                                                                                                <div>
+                                                                                                                    <div>
+                                                                                                                        <div>
+                                                                                                                            {
+                                                                                                                        </div>
+                                                                                                                        <div>
+                                                                                                                            &nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Some&nbsp;products&nbsp;are&nbsp;out&nbsp;of&nbsp;stock",
+                                                                                                                        </div>
+                                                                                                                        <div>
+                                                                                                                            &nbsp;&nbsp;&nbsp;&nbsp;"outOfStockItems":&nbsp;"Tote&nbsp;bag"
+                                                                                                                        </div>
+                                                                                                                        <div>
+                                                                                                                            }
+                                                                                                                        </div>
+                                                                                                                    </div>
+                                                                                                                </div>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
